@@ -24,6 +24,7 @@
 library(tidyverse) # tidyなデータ処理や描画に関するライブラリ詰め合わせ
 library(lubridate) # 日付データを手頃にまともに扱えるライブラリ
 library(ggrepel)
+library(patchwork)
 library(viridis) # viridisカラーパレットを扱うパッケージ。ユニバーサルデザインに必須。
 library(viridisLite) # 
 
@@ -135,6 +136,84 @@ ggsave(
   "tp_01_lineplot_01.pdf", # ファイル名
   plot = tp_01_lineplot_01 # 保存するグラフを格納したオブジェクト
   )
+
+# おまけ viridis()パッケージ色比較用グラフ
+# データを整形する
+iris_tidy <- 
+  iris %>% 
+  tidyr::pivot_longer(
+    cols = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+    names_to = "attributes",
+    values_to = "size"
+  )
+# 密度プロットを描画する
+iris.density <- 
+  iris_tidy %>% 
+  dplyr::filter(attributes == "Sepal.Length") %>% 
+  ggplot(aes(x = size, y = ..density.., fill = Species)) +
+  geom_density(colour = "transparent", alpha = 0.7) +
+  theme_classic() +
+  theme(
+    strip.background = element_blank(),
+    strip.text = element_text(size = 12),
+    legend.position = "none",
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12)
+  )
+# カラーパレット毎に密度プロットを描く
+iris_magma <- 
+  iris.density + 
+  scale_fill_viridis(
+    discrete = TRUE, 
+    option = "magma"
+  ) + 
+  labs(
+    title = "magma"
+  )
+# infernoパレット
+iris_inferno <- 
+  iris.density + 
+  scale_fill_viridis(
+    discrete = TRUE, 
+    option = "inferno"
+  ) + 
+  labs(
+    title = "inferno"
+  )
+# magmaパレット
+iris_plasma <- 
+  iris.density + 
+  scale_fill_viridis(
+    discrete = TRUE, 
+    option = "plasma"
+  ) + 
+  labs(
+    title = "plasma"
+  )
+# viridisパレット
+iris_viridis <- 
+  iris.density + 
+  scale_fill_viridis(
+    discrete = TRUE, 
+    option = "viridis"
+  ) + 
+  labs(
+    title = "Viridis"
+  )
+# cividisパレット
+iris_cividis <- 
+  iris.density + 
+  scale_fill_viridis(
+    discrete = TRUE, 
+    option = "cividis"
+  ) + 
+  labs(
+    title = "cividis"
+  )
+# 密度プロットをならべる
+iris_density_comparison <- 
+  iris_magma + iris_inferno + iris_plasma + iris_viridis + iris_cividis
+ggsave("./img/iris_density_comparison.png", plot = iris_density_comparison)
 
 #
 ##

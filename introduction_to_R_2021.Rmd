@@ -13,6 +13,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+
 # 自己紹介とおしながき
 ## 宇都宮譲准教授（経済学部）
 + 1975年生まれ。2005年から本学に奉職
@@ -59,7 +60,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## 今回はRstudio cloudを使う
 + クラウドサーバ上に置いてあるRとRstudio。
 + 端末側環境を選ばない。
-+ 本来ならばPCにRとRstudioをインストールして使うほうが断然楽。しかし環境によっては素直にインストールできないことがまれにある。特に○urfaceはいろいろと都合が悪いことが多い。
++ 本来ならばPCにRとRstudioをインストールして使うほうが断然楽。しかし環境によっては素直にインストールできないことがまれにある。
 
 ## 設定
 1. 検索エンジンでRstudio cloudを探す。
@@ -146,7 +147,7 @@ $$
 2. データを整形する
 3. 作図する
 
-## Rコード | https://github.com/yuzuruu/introducion_to_R_2021/blob/Yuzuru/introduction_to_R_2021.r
+## Rコードと一式 | https://github.com/yuzuruu/introducion_to_R_2021
 ```{r github.yuzuru, echo=FALSE, fig.align = "center", out.width='50%'}
 knitr::include_graphics("./img/qr_github_yuzuru.png")
 ```
@@ -370,7 +371,10 @@ tp_01_lineplot_02 <-
     - 色はviridisパッケージがだいぶ解決してくれる。
     - 白黒印刷して自然なグレイスケールになるスグレモノ
 
-## viridisパッケージ比較
+## viridisパッケージカラーパレット比較
+```{r iris.density.comparison, echo=FALSE, fig.align = "center", out.width='80%'}
+knitr::include_graphics("./img/iris_density_comparison.png")
+```
 
 
 ## 見た目詳細を微調整する | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
@@ -410,6 +414,13 @@ $$
 x_{t+1} = x_{t} + \varepsilon
 $$
 
+## 参考文献 | Rで作図するには
 
-# おつとめごくろうさまでした
++ Chang W., 石井弓美子・河内崇・瀬戸山雅人訳(2019)『Rグラフィックスクックブック（第2版）』オライリー・ジャパン (isbn:9784873118925)。
+    - 英語版R graphics cookbookはpdf版が無料。
+    - Rで作図するには必携。
+    - データハンドリングについても少々記述あり。
++ 教科書見ながら試行錯誤すると、数ヶ月で様々なグラフや地図を描けるようになります。
+
+# おしまい
 
