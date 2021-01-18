@@ -1,0 +1,415 @@
+---
+title: "プログラミング"
+subtitle: "社会生活における情報活用術"
+author: "宇都宮　譲　Yuzuru Utsunomiya, Ph. D."
+date: "`r Sys.time()`"
+output:
+  ioslides_presentation:
+    css: ../lecture/css/slide.css
+    widescreen: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# 自己紹介とおしながき
+## 宇都宮譲准教授（経済学部）
++ 1975年生まれ。2005年から本学に奉職
++ 専門：人的資源管理論 Human Resource Management
+    - 働けそうな人の数を推定する@タイランド
+    - 漂着ごみ重量推定や生態系サービス推定
+    - その他色々、東南アジアでやってます
+
+## Rを使った経験
++ 2004年くらいから。ありとあらゆるものをRでつくります
++ 2018-2019　Rワークショップ
+    - カントー大学（ベトナム）にて開催
+    - JICA（独立行政法人国際協力機構）調査団として
+
+## おしながき
+1. R言語に関する簡単な説明
+2. Rコードを書いて折れ線グラフをつくる
+3. 課題に関する説明
+
+# R言語を使う
+
+## Rとは
++ 無料統計解析環境。
++ 科学の世界のデファクトスタンダード。
++ 統計解析や作図だけではない。
+    - 論文執筆
+    - スライド作成（実はこのスライドも）
+    - その他色々
+
+## Rを使うメリット
++ 無料。
++ 軽い。
++ 覚えやすい。
++ 素晴らしいIDE（統合開発環境）がある。
++ 美麗な作図。
++ 意識高そうな人々が皆無。
++ その他長所は枚挙にいとまがない。
+
+## Rを使うデメリット
++ ある程度勉強が必要。
++ 外付けキーボードやより能力が高いPCがほしくなる。
++ マウスがうっとうしくなる。
+
+## 今回はRstudio cloudを使う
++ クラウドサーバ上に置いてあるRとRstudio。
++ 端末側環境を選ばない。
++ 本来ならばPCにRとRstudioをインストールして使うほうが断然楽。しかし環境によっては素直にインストールできないことがまれにある。特に○urfaceはいろいろと都合が悪いことが多い。
+
+## 設定
+1. 検索エンジンでRstudio cloudを探す。
+2. アカウントを作る。
+3. 新しいプロジェクトを、適当な名前で作る。
+4. 新しいrファイルを、適当な名前で作る。
+
+## Rstudio Cloudプロジェクト作成
+```{r rsc.login, echo=FALSE, fig.align = "center", out.width='80%'}
+knitr::include_graphics("./img/rsc_login.png")
+```
+
+## Rstudio Cloudにてrファイル作成
+```{r rsc.makefile, echo=FALSE, fig.align = "center", out.width='80%'}
+knitr::include_graphics("./img/rsc_makefile.png")
+```
+
+## 覚えておいたほうがいいキーバインド
++ **Ctrl+s**：上書き保存。超重要。
++ **Ctrl + Enter**：選択部分を実行。
++ **Ctrl + shift + c**：選択箇所をコメントアウト
+
+## コメント
++ なにをするコードか、なにを意図するコードか、書き込まれたメモ。
++ コメントになっている部分は実行されない。
++ Rにおいては、#（しゃーぷっ）より右側。異なる色で表示される。
++ コード本体よりもコメントを書くことに時間をかけたほうがよいくらい重要。
+    - 味・おぼえていますか（10日前の夕食）
+
+## コードを書いてみましょうか | 全角空白は使わない
+```{r trial, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE, fig.align = "center", out.width='50%'}
+# 正規乱数を10,000つ生成、オブジェクトhogeに格納
+hoge <- rnorm(10000) 
+# ヒストグラムを描画
+graphics::hist(hoge, freq = FALSE)
+
+```
+
+## 基本知識1　オブジェクトと代入
++ オブジェクト：内部に値やグラフやその他色々収納可能なもの。
++ 代入：オブジェクトになにかを収納すること。
++ オブジェクトに代入できるメリットは大きい。
+    - 後から参照できる=覚えておく必要がない。
+    - 短いコードで済む。
+
+## 基本知識2　ライブラリと関数
++ Rは必要な機能を備えたライブラリを都度読み込んで使う。
++ ライブラリは関数の集合。
++ 関数とは
+    - データを与えると結果が返ってくる
+    - 引数と呼ばれる設定値で動作を調整調整する
+    - 数学における関数に似ている
+    - 自作もできます。
+
+## 基本知識3　変数（へんすう）と引数（ひきすう）
++ 変数：関数に与えるデータ。たいていオブジェクトに代入して使う。
+    - 数値や文字列を与える
+    - 使い方はヘルプをみればわかる
++ 引数：関数動作を決定する特殊な変数。
+    - 数値や文字列を与える
+    - 使い方はヘルプを見ればわかる
+
+## 凡例
+$$
+\underbrace{hoge}_{オブジェクト}\ \overbrace{\leftarrow}^{矢印は代入演算子}\ \underbrace{\underbrace{rnorm}_{関数}(\underbrace{10000}_{引数})}_{生成した変数\\(もちろん、収集したデータでもよい)}
+$$
+
+## 凡例その2
+$$
+\underbrace{graphics}_{パッケージ}::\underbrace{hist}_{関数}(\underbrace{hoge}_{変数}, \underbrace{freq}_{引数名} = \underbrace{FALSE}_{引数})
+$$
+
+# 折れ線グラフを描く
+## 折れ線グラフ
++ 時系列変化する現象を表現するために使うグラフ。
+    - x軸が自然な順番で変化するときに現れる反応を表現するにも使える。
+    - 例）x軸：投与した薬物量　y軸：体温
++ 基本的には
+    - 折れ線は何本あってもいいが、y軸は1本にしたほうがよい。
+    - データがない箇所は点を打ったり線を結んだりしてはいけない。
+
+## 描く手順 | 初学者はこれだけやるだけでも半日かかります
+1. データを読み込む
+2. データを整形する
+3. 作図する
+
+## Rコード | https://github.com/yuzuruu/introducion_to_R_2021/blob/Yuzuru/introduction_to_R_2021.r
+```{r github.yuzuru, echo=FALSE, fig.align = "center", out.width='50%'}
+knitr::include_graphics("./img/qr_github_yuzuru.png")
+```
+
+## データを読み込む
++ 官庁統計集計表はたいていMSExcel形式で提供される。もしくは.csv
+    - 人類社会にはMSExcelを活用する人が多い。
+    - **精度が低い上に関数内部仕様が不明なMSExcelを解析に使ってはいけない!!**
+    - 個票はやSPSSやStataだったりすることもある。
++ Rは様々な形式のファイルを読み込むことができる
+
+## 手順
++ Rコードファイル（拡張子が.rなファイル）と同じディレクトリ内にデータが収納されたファイルを置く。
+    - パスを指定できるならば、同じでなくてもよい。
+    - おためしなのでこの程度。本当はProjectやファイル構成など考えたほうがいい。
++ 読み込む=オブジェクトに代入する。
++ 確認する
+
+## 本日使うデータ紹介
++ アジアにおける人口推移（1950-2100年）
++ UN（国際連合）による人口推計
++ 変数
+    - 年次：推計年次。1950年から5年毎。1年毎データも提供される
+    - 性別：男性か女性か。男女合計も
+    - 人口：調査時点において生きている人間の数を推定した値。
+
+## データを置く場所
+```{r upload.file, echo=FALSE, fig.align = "center", out.width='80%'}
+knitr::include_graphics("./img/upload.file.png")
+```
+
+## データを読み込むコード | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r load.library.data, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(lubridate)
+library(viridis)
+library(viridisLite) 
+tp_01 <- 
+  readxl::read_excel(
+    path = "total_population_01.xlsx",
+    sheet = "Data"
+  )
+```
+
+## 使った関数 | それぞれ左側に?をつけて実行するとヘルプが表示されます
++ base::library
+    - ライブラリを読み込む関数。
+    - Rを使ってなにか計算する前に毎回必ず読み込む必要がある。
+    - インストールされていないとエラーが出たら、**install.packages("関数名")**でインストールする。
++ readxl::read_excel
+    - MSExcelファイルを読み込む関数。
+
+## データを整形する
++ 読み込んだデータはそのままではRで活用できない
++ 自分でデータをつくるときは
+    - 整形しなくてもよいデータセットをつくる
+    - 整形しなくてもよいデータセットをつくる
+    - 整形しなくてもよいデータセットをつくる
+
+## tidyなデータとは
++ 行方向に読むとなにが書いてあるかわかるデータ
+    - Rをはじめとする統計解析ソフトウェアは、さようなデータを好む
+    - 人類社会で配布されるデータは、そうなっていない
+    - 国際機関が配布するデータは、ようやくR好みになってきた
++ データは加工しないと使うもの
+
+## tidyでないデータ見本 | 横持ちデータ
+```{r iris, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+iris
+```
+
+## tidyなデータ見本 | 縦持ちデータ
+```{r iris.tidy, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+iris %>% 
+  tidyr::pivot_longer(
+    cols = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+    names_to = "attributes",
+    values_to = "size"
+  )
+```
+
+## おまけ irisはアヤメの花。| 統計解析学習用データといえばiris
+```{r iris.flower, echo=FALSE, fig.align = "center", out.width='100%'}
+knitr::include_graphics("./img/iris.png")
+```
+
+## tidyなデータにするには
++ **tidyverse**パッケージがとっても便利。
+    - いまどきRコードにとっては標準。
+    - 処理が早い。直感的に理解しやすい。
+    - 一部で相性がよくない関数あり。昔ながらの書き方もまだまだ必要。
++ くわしい使い方は、cheatsheetと呼ばれる虎の巻が役立つ。
+
+## チートシートいっぱい
+```{r cheetsheets, echo=FALSE, fig.align = "center", out.width='80%'}
+knitr::include_graphics("./img/cheatsheets.png")
+```
+
+## 方針
++ 横長データを縦長データにする
++ 手作業ではダメ？$\rightarrow$ダメゼッタイ
+    - 疲れる
+    - ミスをする
+    - 自動化バンザイ
+
+## 整形する | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r reshape, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+tp_01_tidy <- 
+  tp_01 %>% 
+  tidyr::pivot_longer(
+    cols = c("total", "female", "male"),
+    names_to = "gender",　
+    values_to = "population"　
+  ) %>% 
+  dplyr::mutate(
+    gender = factor(gender),　 
+    year = lubridate::ymd(
+      base::paste(year, "-01-01", sep = ""　
+        )))
+```
+
+## 使った関数 | それぞれ左側に?をつけて実行するとヘルプが表示されます
++ %>% 
++ tidyr::pivot_longer()
++ dplyr::mutate
++ lubridate::ymd
+
+# 折れ線グラフを描く（つづき）
+## 折れ線グラフ（再論）
++ 時系列変化する現象を表現するために使うグラフ
+    - x軸が自然な順番で変化するときに現れる反応を表現するにも使える
+    - 例）x軸：投与した薬物量　y軸：体温
++ 基本的には
+    - 折れ線は何本あってもいいが、y軸は1本にしたほうがよい
+    - データがない箇所は点を打ったり線を結んだりしてはいけない
+
+## 折れ線グラフの構造 | クレープみたいにできています
+1. プロットエリア：データから作る作図領域。xy平面（あるいは空間）とその周囲。
+2. 幾何オブジェクト：データからつくる点と線。プロットエリア上に乗る。
+3. エステティック：2.の見た目。色や形。たいていデータを使って指定する。
+4. スケール：3.の詳細。
+5. ガイド：4.の詳細。
+
+## プロットエリアをつくる | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r plot_01, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+tp_01_lineplot <- 
+  tp_01_tidy %>% 
+  ggplot(
+    aes(
+      x = year,
+      y = population,
+      color = gender
+      )
+    )
+```
+
+## 使った関数 | それぞれ左側に?をつけて実行するとヘルプが表示されます
++ %>% 
++ ggplot2::ggplot()
+    - 作図の王道。
+    - geom_で幾何オブジェクトを指定する
+    - 
+
+## グラフオブジェクトを加える | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r plot_02, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+tp_01_lineplot_01 <- 
+  tp_01_lineplot +
+  geom_line(size = 1.5) +
+  geom_point(size = 2) +
+  geom_text_repel(
+    data = tp_01_tidy %>% 
+      dplyr::filter(
+        year == max(year)
+        ),
+    aes(label = gender),
+    nudge_x = 50,
+    size = 6
+  )
+```
+
+## 使った関数 | それぞれ左側に?をつけて実行するとヘルプが表示されます
++ %>% 
++ geom_line()
++ geom_point()
++ geom_text_repel()
++ どれも幾何オブジェクトを配置するための関数
+
+## よい折れ線グラフとは
++ 変化が読み取りやすい
+    - 変化量（傾き）や傾向（長期的な変化）が読み取れる
+    - 系列（変数どうし）を区分できる
+    - 欠測があることも読み取ることができるように
++ 読み取りやすくするために
+    - ラベル位置を考える：折れ線近傍にラベル名があったほうが視線を動かさずに済む
+    - 色を考える：白黒印刷でも読めるか。色覚異常があっても読めるか。
+    - 点を与えるかどうか慎重に考える
+
+## ラベルと色を変える | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r plot_03, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+tp_01_lineplot_02 <- 
+  tp_01_lineplot_01 +
+  labs(
+    title = "Population in Asian Countries",　
+    subtitle = "Source: UN World Population Prospects",
+    x = "Year (1950-2100)", 　
+    y = "Population (Unit: 1,000Pax.)",　 
+    color = "Gender"　
+  ) +
+  scale_color_viridis(
+    option = "plasma",　
+    discrete = TRUE　
+  ) 
+
+```
+
+## 補遺　ユニバーサルデザイン（UD）
++ 誰でもだいたい利用できそうなデザイン
++ 色、形状、その他いろいろ。
++ RはUDなグラフを作る機能が盛りだくさん
+    - 色はviridisパッケージがだいぶ解決してくれる。
+    - 白黒印刷して自然なグレイスケールになるスグレモノ
+
+## viridisパッケージ比較
+
+
+## 見た目詳細を微調整する | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r plot_04, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
+tp_01_lineplot_03 <- 
+  tp_01_lineplot_02 + 
+  theme_classic() +
+  theme(
+    legend.position = "none",
+    legend.text = element_text(size = 12), 
+    axis.text = element_text(size = 12) 
+  )
+
+
+```
+
+## 完成
+```{r plot_05, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE, fig.align='center'}
+tp_01_lineplot_03
+```
+
+
+## 保存 | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+```{r plot_06, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE, fig.align='center'}
+ggsave(
+  "tp_01_lineplot.pdf",
+  plot = tp_01_lineplot_03
+  )
+```
+
+## 今後の課題
++ 日本語対応：できるようなできないような。
++ 時系列モデルによる予測結果をプロット。統計解析の王道（のひとつ）。
++ 基本的な時系列モデルAR(1)：明日の自分は今日の自分とちょっと似てる
+
+$$
+x_{t+1} = x_{t} + \varepsilon
+$$
+
+
+# おつとめごくろうさまでした
+
