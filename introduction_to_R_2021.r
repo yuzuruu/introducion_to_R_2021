@@ -51,7 +51,7 @@ tp_01_tidy <-
     names_to = "gender",
     values_to = "population"
     ) %>% 
-  # もともとの変数名（列名）をまとめるときに使う変数名  # dplyr::mutate()関数
+  # dplyr::mutate()関数
   # オブジェクトに変数を加えるとき、あるいは
   # すでにある変数を変換するときに使う
   dplyr::mutate(
@@ -69,10 +69,17 @@ tp_01_tidy <-
       )
     )
 
-
-
-
-
+# おまけ tidyなデータとそうでもないデータ
+# tidyでもなんでもないただのアヤメのデータ
+iris
+# おまけ tidyなデータとそうでもないデータ
+# アヤメのデータをtidyにする
+iris %>% 
+  tidyr::pivot_longer(
+    cols = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
+    names_to = "attributes",
+    values_to = "size"
+  )
 
 # 4. 折れ線グラフを作図する
 # ggplot2::ggplot()関数が大活躍!!
