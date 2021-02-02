@@ -183,6 +183,7 @@ knitr::include_graphics("./img/upload.file.png")
 ```{r load.library.data, include = TRUE, echo = TRUE, message = FALSE, warning=FALSE}
 library(tidyverse)
 library(ggrepel)
+library(GGally)
 library(lubridate)
 library(viridis)
 library(viridisLite) 
@@ -405,14 +406,6 @@ ggsave(
   )
 ```
 
-## 今後の課題
-+ 日本語対応：できるようなできないような。
-+ 時系列モデルによる予測結果をプロット。統計解析の王道（のひとつ）。
-+ 基本的な時系列モデルAR(1)：明日の自分は今日の自分とちょっと似てる
-
-$$
-x_{t+1} = x_{t} + \varepsilon
-$$
 
 ## 参考文献 | Rで作図するには
 
@@ -422,5 +415,233 @@ $$
     - データハンドリングについても少々記述あり。
 + 教科書見ながら試行錯誤すると、数ヶ月で様々なグラフや地図を描けるようになります。
 
-# おしまい
+# おしまい?
 
+# おまけ　相関係数
+
+## ピアソンの積率相関係数$r$ | 教科書的定義
++ よく使われる相関係数といえばこれ。
++ 共分散と標準偏差の積との比。
+
+$$
+r = \frac{\sum_{i=1}^{n}(x_{i}-\bar{x})(y_{i}-\bar{y})}{\sqrt{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}\sqrt{\sum_{i=1}^{n}(y_{i}-\bar{y})^2}} 
+= \frac{covar_{xy}}{SD_{x}SD_{y}}
+$$
+
+## なぜこのように定義されるか
+
+1. 相関係数はなにを表現するか
+2. モーメントをサンプルサイズと標準偏差にて調整する
+3. $r$の正体は結局なにか
+
+## 散布図から考える$r$の意味
+
+```{r variety, include = TRUE, warning = FALSE, message = FALSE, echo=FALSE, fig.align='center'}
+r2norm <- 
+  function(n, mu, sigma, rho) {
+    tmp <- rnorm(n)
+    x   <- mu+sigma*tmp
+    y   <- rho*x + sqrt(1-rho^2)*rnorm(n)
+    return(
+      data.frame(
+        x=x,
+        y=y
+        )
+      )
+}
+# 正規乱数を発生させる
+# r = 0.05
+datap0.05 <- r2norm(1000, 0, 1, 0.05) %>% mutate(attribute = factor("r=0.05"))
+# r = 0.5
+datap0.5 <- r2norm(1000, 0, 1, 0.5) %>% mutate(attribute = factor("r=0.5"))
+# r = 0.95
+datap0.95 <- r2norm(1000, 0, 1, 0.95) %>% mutate(attribute = factor("r=0.95"))
+# r = -0.05
+datam0.05 <- r2norm(1000, 0, 1, -0.05) %>% mutate(attribute = factor("r=-0.05")) 
+# r = -0.5
+datam0.5 <- r2norm(1000, 0, 1, -0.5) %>% mutate(attribute = factor("r=-0.5")) 
+# r = -0.95
+datam0.95 <- r2norm(1000, 0, 1, -0.95) %>% mutate(attribute = factor("r=-0.95"))
+# データを結合してtidy化して作図
+list(datap0.05, datap0.5, datap0.95, datam0.05, datam0.5, datam0.95) %>% 
+  do.call(rbind, .) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_point() +
+  facet_wrap(~ attribute) +
+  theme_classic() +
+  theme(
+    strip.background = element_blank()
+  )
+```
+
+## 算術平均回りのモーメントで考える | 相関がある場合、合成モーメント$\sum(x_{i}-m_{x})(y_{i}-m_{y})$が大
+```{r moment, include = TRUE, warning = FALSE, message = FALSE, echo=FALSE, fig.align='center'}
+data <- r2norm(1000, 0, 1, 0.9)
+sp_01 <- 
+  data %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_point(color = "lightblue") +
+  geom_segment(x =0,y=-2,xend=0,yend=2)+
+  geom_segment(x =-2,y=0,xend=2,yend=0)+
+  geom_segment(aes(x =0,y=1,xend=0.8,yend=1), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  geom_segment(aes(x =0.8,y=1,xend=0,yend=1), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  geom_segment(aes(x =0.8,y=0,xend=0.8,yend=1), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  geom_segment(aes(x =0.8,y=1,xend=0.8,yend=0), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  annotate("text", x = 0, y = -2, label = "m[x]", parse = TRUE, size = 6)+
+  annotate("text", x = -2, y = 0, label = "m[y]", parse = TRUE, size = 6)+
+  annotate("text", x = 0.5, y = 1.2, label = "x[i]-m[x]", parse = TRUE, size = 8)+
+  annotate("text", x = 1.0, y = 0.3, label = "y[i]-m[y]", parse = TRUE, size = 8)+
+  xlim(-2,2) +
+  ylim(-2,2) +
+  labs(x = "x", y = "y") +
+  theme_classic() +
+  theme(
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12)
+  )
+sp_01
+```
+
+## 確認・偏差積和で表現するモーメント大小
+
++ 偏差：平均からの距離
++ 正にせよ負にせよ、相関が強ければ偏差平和（平均からの距離の和。算術平均周りのモーメント）が大きくなるでしょう。
++ 総和がとり得る範囲は省略しますが、当然に$1<i<n$です。
+
+$$
+\sum_{i=1}^{n}(x_{i}-m_{x})(y_{i}-m_{y})
+$$
+
+## いろいろ調整する　その1 | サンプルサイズを調整する
+
++ 偏差積和は、サンプルサイズが大きくなれば大きくなりがち。サンプルサイズが大きければ相関が強いと考えることは、あきらかにおかしい。
++ ならばサンプルサイズで調整すればよい。
+    - サンプルサイズ$n$：集めた標本の数
+    - 調整する=割る
+
+$$
+\frac{\sum(x_{1}-m_{x})(y_{1}-m_{y})}{n-1}
+$$
+
+## いろいろ調整する　その2 | ばらつきを調整する
+
++ 単位が異なると比べるにもやっかい。
+    - メートルとミリメートル、英語と数学の得点など。
+    - 比べることに有用なほうが統計量として使いやすい
++ 単位が異なるときは、ばらつきで調整するとよいことが知られる。
+    - とり得る値の幅（ばらつき）によって、値の大小がもたらす表現できるから。
+    - ばらつきの指標：標準偏差Standard deviation $\sigma$。
+
+$$
+\frac{\frac{\sum(x_{1}-m_{x})(y_{1}-m_{y})}{n-1}}{\sqrt{\frac{\sum(x_{i}-m_{x})^2}{n-1}}\sqrt{\frac{\sum(y_{i}-m_{y})^2}{n-1}}}
+$$
+
+## 相関係数$r$の正体は
+
++ サンプルサイズとばらつきで調整された算術平均回りのモーメント
++ 直線的な変化の度合と表現してもよい
+    - 直線的な関係：非直線的な場合、相関が大きくてもモーメントが大きくなるとは限らない。
+    - 単調増加・減少：単調でない場合、相関が大きくてもモーメントが大きくなるとは限らない。
+    - 確定的：誤差構造がある場合、相関が大きくてもモーメントが大きくなるとは限らない。
++ 無論、Rで計算できます
+
+## airqualityデータを使って
+
++ irisと同じくRが最初から持っているデータセット
++ 1973年6月にニューヨーク（米国）にて採取された待機に関するデータ
+    1. Ozone　オゾン量
+    2. Solar.R　日射量
+    3. Wind　風力
+    4. Temp　温度
+    5. Month　月
+    6. Day　日
+
+## 散布図行列と相関係数 | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+
+```{r pairandcorresults, include = TRUE, warning = FALSE, message = FALSE, echo=TRUE}
+airq <- 
+  na.omit(airquality) %>% 
+  dplyr::select(Ozone,Solar.R,Wind,Temp)
+airq  %>%  
+  GGally::ggpairs(.)
+```
+
+## 多変量には散布図行列と相関行列
+
++ 統計量や統計解析を議論する場合、作図は超重要。しかし2変数ずつ作図し計算するのは面倒。
++ GGally::ggpairs関数がよく働いてくれる。
+    - 各変数密度プロットと散布図を自動的に描いてくれる。相関係数$r$も計算してくれる。
+    - ggplot2::ggplotを裏で使っているから、ggplotで使う引数はたいてい使える。
+
+## $r$はcor.test関数でも計算できる | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+
+```{r correlation_corefficient_pearson, warning = FALSE, message = FALSE, echo=TRUE}
+cor.test(airq$Temp, airq$Wind, method = "pearson")
+```
+
+## スピアマンの $\rho$
++ 順位相関係数の一種。$r$と互換できるというがたぶん誤り。
++ 定義
+
+$$
+\rho = 1-\frac{6\sum_{i=1}^{n}d^{2}_{i}}{n^3-n}
+$$
+
+Where
+$d_{i}$: $i$ 番目の $x$ と $i$番目の $y$との順位の差  
+
+## ケンドールの $\tau$
++ 順位相関係数の一種。同順位（タイ）が多い場合に有用らしい
++ 定義
+
+$$
+\tau = \frac{\sum_{i=1}^{n-1}P_{i}-\sum_{i=1}^{n-1}Q_{i}}{\frac{n(n-1)}{2}}
+$$
+
+Where
+$P_{i}: N. of\ Y_{i}\ (i=1, 2, ....,n-1)$ which is less than $Y_{j}$
+$Q_{i}: N. of\ Y_{i}$ which is more than $Y_{j}\ (j=1, 2, ....,n) $
+
+## Rで計算 $\rho$ | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+
+```{r correlation_corefficient_spearman, warning = FALSE, message = FALSE, echo=TRUE}
+cor.test(airq$Temp, airq$Wind, method = "spearman")
+```
+
+## Rで計算 $\tau$ | 書いて選択して（矢印+Shift）実行（Ctrl + Enter）
+
+```{r correlation_corefficient_kendall, warning = FALSE, message = FALSE, echo=TRUE}
+cor.test(airq$Temp, airq$Wind, method = "kendall")
+```
+
+## 練習
++ **faithful** データを使って
+    - 散布図行列を描く
+    - $r$, $\rho$, and $\tau$ を **cor.test** 関数を使って算出する。
+
+## こたえ
+```{r answer.faithful.01, include = TRUE, warning = FALSE, message = FALSE, echo=TRUE}
+faithful %>% ggpairs(.)  # plot a pairplot
+```
+
+## こたえ（つづき）
+```{r answer.faithful.02, include = TRUE, warning = FALSE, message = FALSE, echo=TRUE}
+cor.test(faithful$eruptions, faithful$waiting, 
+         method = "pearson")
+```
+
+## こたえ（つづき）
+```{r answer.faithful.03, include = TRUE, warning = FALSE, message = FALSE, echo=TRUE}
+cor.test(faithful$eruptions, faithful$waiting, 
+         method = "spearman")
+```
+
+## こたえ（つづき）
+```{r answer.faithful.04, include = TRUE, warning = FALSE, message = FALSE, echo=TRUE}
+cor.test(faithful$eruptions, faithful$waiting, 
+         method = "kendall")
+```
+
+
+# おしまい

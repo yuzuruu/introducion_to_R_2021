@@ -219,3 +219,93 @@ ggsave("./img/iris_density_comparison.png", plot = iris_density_comparison)
 ##
 ### おしまい ---
 
+
+# おまけ　相関係数いろいろ
+# 任意の相関係数を有する正規乱数を発生させる関数
+# mu:平均
+# sigma:標準偏差
+# rho:相関係数
+# n:発生させる乱数の個数
+# ここからいただきました
+# http://cse.naro.affrc.go.jp/takezawa/r-tips/r/60.html
+r2norm <- 
+  function(n, mu, sigma, rho) {
+    tmp <- rnorm(n)
+    x   <- mu+sigma*tmp
+    y   <- rho*x + sqrt(1-rho^2)*rnorm(n)
+    return(
+      data.frame(
+        x=x,
+        y=y
+        )
+      )
+}
+# 正規乱数を発生させる
+# r = 0.05
+datap0.05 <- 
+  r2norm(1000, 0, 1, 0.05) %>% 
+  mutate(attribute = factor("r=0.05"))
+# r = 0.5
+datap0.5 <- 
+  r2norm(1000, 0, 1, 0.5) %>% 
+  mutate(attribute = factor("r=0.5"))
+# r = 0.95
+datap0.95 <- 
+  r2norm(1000, 0, 1, 0.95) %>% 
+  mutate(attribute = factor("r=0.95"))
+# r = -0.05
+datam0.05 <- 
+  r2norm(1000, 0, 1, -0.05) %>% 
+  mutate(attribute = factor("r=-0.05")) 
+# r = -0.5
+datam0.5 <- 
+  r2norm(1000, 0, 1, -0.5) %>% 
+  mutate(attribute = factor("r=-0.5")) 
+# r = -0.95
+datam0.95 <- 
+  r2norm(1000, 0, 1, -0.95) %>% 
+  mutate(attribute = factor("r=-0.95"))
+# データを結合してtidy化して作図
+correl_comparison <- 
+  list(datap0.05, datap0.5, datap0.95, datam0.05, datam0.5, datam0.95) %>% 
+  do.call(rbind, .) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_point() +
+  facet_wrap(~ attribute) +
+  theme_classic() +
+  theme(
+    strip.background = element_blank()
+  )
+
+# 相関係数を考えるにはまずモーメントから
+# 相関係数0.9な乱数を1,000つ発生させる
+data <- r2norm(1000, 0, 1, 0.9)
+# モーメントを考える模式的な散布図を作図する
+sp_01 <- 
+  data %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_point(color = "lightblue") +
+  geom_segment(x =0,y=-2,xend=0,yend=2)+
+  geom_segment(x =-2,y=0,xend=2,yend=0)+
+  geom_segment(aes(x =0,y=1,xend=0.8,yend=1), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  geom_segment(aes(x =0.8,y=1,xend=0,yend=1), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  geom_segment(aes(x =0.8,y=0,xend=0.8,yend=1), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  geom_segment(aes(x =0.8,y=1,xend=0.8,yend=0), size = 1.2, arrow = arrow(length = unit(0.2, "cm")))+
+  annotate("text", x = 0, y = -2, label = "m[x]", parse = TRUE, size = 6)+
+  annotate("text", x = -2, y = 0, label = "m[y]", parse = TRUE, size = 6)+
+  annotate("text", x = 0.5, y = 1.2, label = "x[i]-m[x]", parse = TRUE, size = 8)+
+  annotate("text", x = 1.0, y = 0.3, label = "y[i]-m[y]", parse = TRUE, size = 8)+
+  xlim(-2,2) +
+  ylim(-2,2) +
+  labs(x = "x", y = "y") +
+  theme_classic() +
+  theme(
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12)
+  )
+sp_01
+
+#
+##
+### おしまい ---
